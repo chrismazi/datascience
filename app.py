@@ -4,17 +4,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
 
-# Page Configuration
 st.set_page_config(
     page_title="Vehicle Theft Analytics Dashboard",
-    page_icon="🚔",
     layout="wide"
 )
 
-# Custom Theme and Styling
 st.markdown("""
     <style>
-    /* Import a clean, modern font */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
 
     :root {
@@ -26,18 +22,14 @@ st.markdown("""
 
     body, .css-1d391kg, .stApp {
         font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-        /* do not override Streamlit's theme background so light/dark mode works as expected */
     }
 
-    /* Allow Streamlit to control the page background (light/dark modes).
-       Keep main transparent so chart cards and containers blend with theme. */
     .main {background-color: inherit}
     .stApp header {background-color: transparent}
     div[data-testid="stMetricValue"] {font-size: 20px}
     .streamlit-expanderHeader {background-color: #f0f2f6}
     div.css-12w0qpk.e1tzin5v1 {background-color: var(--card); padding: 20px; border-radius: 10px; box-shadow: 0 6px 18px rgba(16,24,40,0.06)}
 
-    /* Title styles */
     .title {
         font-size: 2.25rem;
         font-weight: 700;
@@ -46,18 +38,15 @@ st.markdown("""
 
     h1, .stMarkdown h1 {font-family: 'Inter', sans-serif}
 
-    /* Sidebar tweaks */
     .css-1d391kg .sidebar .stButton>button {border-radius: 8px}
     .filter-section {background-color: rgba(255,255,255,0.6); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem}
 
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize Session State
 if 'data' not in st.session_state:
     st.session_state['data'] = None
 
-# Define color scheme
 COLOR_SCHEMES = {
     'primary': ['#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3'],
     'sequential': {
@@ -69,19 +58,15 @@ COLOR_SCHEMES = {
     }
 }
 
-# Custom color schemes and chart configurations
 COLOR_SCHEME = {
     'primary': ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'],
-    # make chart background transparent so figures blend with the page
     'background': 'rgba(0,0,0,0)',
-    'text': 'auto'  # Let Streamlit handle text color based on theme
+    'text': 'auto'
 }
 
-# Set default Plotly template
 import plotly.io as pio
 pio.templates.default = "plotly_white"
 
-# Small helper to apply a consistent theme to Plotly figures
 def create_themed_chart(fig):
     fig.update_layout(
         plot_bgcolor=COLOR_SCHEME['background'],
@@ -90,10 +75,8 @@ def create_themed_chart(fig):
     )
     return fig
 
-# Page config
-st.set_page_config(page_title="Vehicle Theft Analysis", layout="wide", page_icon="🚗")
+st.set_page_config(page_title="Vehicle Theft Analysis", layout="wide")
 
-# Custom CSS
 st.markdown("""
     <style>
     .main {
@@ -116,9 +99,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Replace the existing filter section with this improved version
 def initialize_filters():
-    """Initialize dashboard filters in session state"""
     if 'filters' not in st.session_state:
         st.session_state.filters = {
             'date_range': None,
@@ -130,18 +111,13 @@ def initialize_filters():
         }
 
 def apply_filters(df):
-    """Apply all active filters to the dataframe"""
     filtered_df = df.copy()
-    
-    # Date filter
     if st.session_state.filters['date_range'] and len(st.session_state.filters['date_range']) == 2:
         start_date, end_date = st.session_state.filters['date_range']
         filtered_df = filtered_df[
             (filtered_df['date_stolen'].dt.date >= start_date) & 
             (filtered_df['date_stolen'].dt.date <= end_date)
         ]
-    
-    # Categorical filters
     if st.session_state.filters['makes']:
         filtered_df = filtered_df[filtered_df['make_name'].isin(st.session_state.filters['makes'])]
     
@@ -159,45 +135,33 @@ def apply_filters(df):
     
     return filtered_df
 
-# Add this after loading the data but before the filters
 def clean_categorical(df, columns):
-    """Clean categorical columns by converting to string and handling nulls"""
     df_clean = df.copy()
     for col in columns:
         if col in df_clean.columns:
             df_clean[col] = df_clean[col].fillna('Unknown').astype(str)
     return df_clean
 
-# Load data once at startup
 @st.cache_data
 def load_data():
-    """Load and prepare the dataset"""
     df = pd.read_csv('stolen_vehicles_enhanced.csv')
-    # Convert date column
     df['date_stolen'] = pd.to_datetime(df['date_stolen'])
-    # Clean categorical columns
     categorical_cols = ['make_name', 'vehicle_type', 'color', 'region', 'make_type']
     df = clean_categorical(df, categorical_cols)
     return df
 
-# Load the data
 try:
     df_f = load_data()
 except FileNotFoundError:
     st.error("Please ensure 'stolen_vehicles_enhanced.csv' is in the same directory as this script.")
     st.stop()
 
-# Initialize session state
 initialize_filters()
 
-# Load data
 df_original = load_data()
 
-# Sidebar filters
 with st.sidebar:
     st.title(" Filters")
-    
-    # Vehicle Filters
     with st.expander(" Vehicle Filters", expanded=True):
         st.session_state.filters['makes'] = st.multiselect(
             "Make",
@@ -220,8 +184,6 @@ with st.sidebar:
             default=st.session_state.filters['colors'],
             key="colors_filter"
         )
-    
-    # Location Filter
     with st.expander(" Location", expanded=True):
         st.session_state.filters['regions'] = st.multiselect(
             "Region",
@@ -229,30 +191,23 @@ with st.sidebar:
             default=st.session_state.filters['regions'],
             key="regions_filter"
         )
-    
-    # Reset Filters
     if st.button("Reset All Filters", type="primary"):
-        # Clear filter values
         for key in st.session_state.filters.keys():
             st.session_state.filters[key] = [] if isinstance(st.session_state.filters[key], list) else None
-        # Delete widget keys to force reset
         widget_keys = ["makes_filter", "types_filter", "colors_filter", "regions_filter"]
         for widget_key in widget_keys:
             if widget_key in st.session_state:
                 del st.session_state[widget_key]
         st.rerun()
 
-# Apply filters to get filtered dataframe
 df_filtered = apply_filters(df_original)
 
-# Display filter summary
 with st.sidebar:
     st.markdown("---")
     st.markdown("###  Filter Summary")
     st.markdown(f"**Total Records:** {len(df_filtered):,}")
     st.markdown(f"**Filter Reduction:** {((1 - len(df_filtered)/len(df_original)) * 100):.1f}%")
 
-# Professional Header with Centered Logo
 col1, col2, col3 = st.columns([1.5, 1, 1.5])
 with col2:
     try:
@@ -268,20 +223,16 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# Sidebar Configuration
 st.sidebar.title(' Dashboard Controls')
 
-# Metrics Display
 st.sidebar.markdown("###  Key Metrics")
 total_thefts = len(df_filtered)
 unique_makes = df_filtered['make_name'].nunique()
 st.sidebar.metric("Total Incidents", f"{total_thefts:,}")
 st.sidebar.metric("Unique Makes", f"{unique_makes:,}")
 
-# Main Dashboard Section
 st.markdown("### Analysis of Vehicle Theft")
 
-# Top Row - KPI Cards
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     total_luxury = len(df_filtered[df_filtered['make_type'] == 'Luxury'])
@@ -293,8 +244,6 @@ with col3:
     most_stolen = df_filtered['make_name'].mode()[0]
     st.metric("Most Stolen Make", most_stolen)
 with col4:
-    # Add this after loading the data but before calculations
-    # Convert population to numeric, removing any commas and handling errors
     df_filtered['population'] = pd.to_numeric(df_filtered['population'].astype(str).str.replace(',', ''), errors='coerce')
 
     avg_population = df_filtered['population'].mean()
@@ -304,13 +253,10 @@ with col4:
     else:
         st.metric("Thefts per 100k", "N/A")
 
-# Charts Section
 st.markdown("### Detailed Analysis")
 
-# SECTION 1: Most Stolen Vehicles (Most Important)
 st.subheader(" Most Frequently Stolen Vehicle Models")
 
-# Sort data in descending order to match the visualization
 model_count = df_filtered['vehicle_desc'].value_counts().reset_index()
 model_count.columns = ['model', 'count']
 
@@ -324,7 +270,6 @@ fig_models = px.bar(
     color_continuous_scale='viridis'
 )
 
-# Update layout for better visualization
 fig_models.update_layout(
     margin=dict(l=150, r=20, t=40, b=20),
     yaxis={
@@ -336,7 +281,6 @@ fig_models.update_layout(
     yaxis_title="Vehicle Model"
 )
 
-# Make the continuous colorbar for this chart more visible
 fig_models.update_traces(marker_colorbar=dict(
     title=dict(text='Number of Thefts'),
     thickness=18,
@@ -347,7 +291,6 @@ fig_models.update_traces(marker_colorbar=dict(
 
 st.plotly_chart(fig_models, width='stretch')
 
-# SECTION 2: Vehicle Makes Analysis
 st.subheader(" Vehicle Makes Analysis")
 col5, col6 = st.columns(2)
 
@@ -372,7 +315,6 @@ with col5:
     st.plotly_chart(fig, width='stretch')
 
 with col6:
-    # Luxury vs Standard donut chart
     make_type_counts = df_filtered['make_type'].value_counts()
     if 'Unknown' in make_type_counts.index:
         make_type_counts = make_type_counts[make_type_counts.index != 'Unknown']
@@ -389,7 +331,6 @@ with col6:
     )
     st.plotly_chart(fig, width='stretch')
 
-# SECTION 3: Regional Analysis
 st.subheader(" Regional Theft Analysis")
 col3, col4 = st.columns(2)
 
@@ -415,7 +356,6 @@ with col3:
     st.plotly_chart(fig, width='stretch')
 
 with col4:
-    # Regional Model Distribution
     top_models = df_filtered['vehicle_desc'].value_counts().head(10).index
     subset_df = df_filtered[df_filtered['vehicle_desc'].isin(top_models)]
 
@@ -433,12 +373,10 @@ with col4:
     )
     st.plotly_chart(fig, width='stretch')
 
-# SECTION 4: Time Trends
 st.subheader(" Theft Trends Over Time")
 col_time1, col_time2 = st.columns(2)
 
 with col_time1:
-    # Quarterly Trend
     df_filtered['date_stolen'] = pd.to_datetime(df_filtered['date_stolen'], errors='coerce')
     quarterly_counts = (
         df_filtered
@@ -460,7 +398,6 @@ with col_time1:
     st.plotly_chart(fig, width='stretch')
 
 with col_time2:
-    # Model Year Analysis
     model_years = (
         df_filtered['model_year']
         .dropna()
@@ -484,7 +421,6 @@ with col_time2:
     )
     st.plotly_chart(fig, width='stretch')
 
-# SECTION 5: Vehicle Demographics
 st.subheader(" Vehicle Demographics")
 col1, col2 = st.columns([1, 1])
 
@@ -508,9 +444,7 @@ with col1:
         color_continuous_scale='viridis',
         template='plotly_white'
     )
-    # hover info and show a clear, legible colorbar
     fig_colors.update_traces(hovertemplate="<b>%{x}</b><br>Thefts: %{y}<extra></extra>", marker=dict(showscale=True))
-    # style the colorbar so it's visible on the page
     fig_colors.update_traces(marker_colorbar=dict(
         title=dict(text='Number of Thefts'),
         thickness=18,
@@ -518,7 +452,6 @@ with col1:
         outlinewidth=1,
         outlinecolor='rgba(128,128,128,0.3)'
     ))
-    # Make axes and gridlines clearly visible against the theme
     fig_colors.update_layout(
         xaxis=dict(
             tickangle=45,
@@ -566,7 +499,6 @@ with col2:
     fig_types = create_themed_chart(fig_types)
     st.plotly_chart(fig_types, width='stretch')
 
-# SECTION 6: Vehicle Age Analysis
 st.subheader(" Vehicle Age Analysis")
 model_years = (
     df_filtered['model_year']
@@ -598,12 +530,10 @@ fig.update_layout(
 )
 st.plotly_chart(fig, width='stretch')
 
-# SECTION 7: Vehicle Make & Color Analysis
 st.subheader(" Vehicle Make & Color Distribution")
 col7, col8 = st.columns([2, 1])
 
 with col7:
-    # Maker color analysis
     maker_color_counts = (
         df_filtered.groupby(['make_name', 'color'])
         .size()
@@ -632,17 +562,14 @@ with col7:
     )
     st.plotly_chart(fig, width='stretch')
 
-# SECTION 8: Population Density Analysis
 st.subheader(" Population Density Impact Analysis")
 
-# Data preparation
 region_thefts = df_filtered.groupby('region')['vehicle_id'].count().reset_index()
 region_thefts.rename(columns={'vehicle_id': 'theft_count'}, inplace=True)
 region_info = df_filtered[['region', 'population', 'density']].drop_duplicates()
 region_data = region_thefts.merge(region_info, on='region', how='left')
 corr_value = region_data['theft_count'].corr(region_data['density'])
 
-# Scatter plot with trend line
 fig = px.scatter(
     region_data,
     x='density',
@@ -660,33 +587,26 @@ fig.update_traces(marker=dict(size=8, opacity=0.6))
 fig.update_layout(height=500)
 st.plotly_chart(fig, width='stretch')
 
-# Before calculating thefts_per_10k_pop, convert population to numeric
-# Convert population to numeric, handling non-string values first
 def clean_population(value):
     if pd.isna(value):
         return None
     try:
-        # Convert to string first, then remove commas
         return str(value).replace(',', '')
     except:
         return None
 
-# Apply the cleaning function and convert to numeric
 region_data['population'] = pd.to_numeric(
     region_data['population'].apply(clean_population), 
     errors='coerce'
 )
 
-# Now calculate the per-capita rate
 region_data['thefts_per_10k_pop'] = (region_data['theft_count'] / region_data['population']) * 10000
 
-# Format numbers for better visibility
 def format_number(x):
     if isinstance(x, (int, float)):
         return f"{x:,.2f}" if x % 1 else f"{int(x):,}"
     return str(x)
 
-# Display top and bottom regions in tables
 col9, col10 = st.columns(2)
 
 with col9:
