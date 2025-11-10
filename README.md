@@ -15,7 +15,7 @@
 
 > **Tags:** `streamlit` · `plotly` · `data-science` · `dashboards` · `crime-analytics`
 
-## 📌 Overview
+##  Overview
 
 This repository contains an interactive Streamlit dashboard, supporting notebook, and documentation for Cenfri's Motor Vehicle Theft Analysis assessment (November 2025). The dashboard helps the Chief of Police understand theft patterns, high-risk areas, vehicle characteristics, and population dynamics by combining descriptive analytics with actionable recommendations.
 
@@ -27,7 +27,7 @@ Key deliverables include:
 - **`.devcontainer/`** – Optional container setup for reproducible development environments.
 - **`requirements.txt`** – Dependency list pinned for Streamlit Cloud deployment.
 
-## 🗂️ Repository Structure
+## Repository Structure
 
 ```
 datascience
@@ -40,7 +40,7 @@ datascience
 └── README.md                # You are here
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -70,27 +70,26 @@ streamlit run app.py
 
 Streamlit will open a local development server (default: `http://localhost:8501`). Use the sidebar filters (make, type, color, region) to interact with the data in real time.
 
-## 📊 Dashboard Highlights
+##  Dashboard Highlights
 
 - **Executive KPIs** – total incidents, most stolen makes, thefts per 100k population, and more.
 - **Model & Make Rankings** – horizontal bar charts spotlighting the top stolen vehicles.
-- **Regional Insights** – heatmaps and histograms exposing hotspots and regional distribution of models.
 - **Temporal Trends** – quarterly incident trends plus model year analysis to reveal high-risk periods.
 - **Demographics Breakdown** – color, vehicle type, and make-color combinations visualized via bar charts and tables.
 - **Population Density Impact** – scatter plot with OLS trendline quantifying correlation between density and thefts.
 - **Per-Capita Risk Tables** – ranked tables for highest and lowest theft rates per 10k residents.
 
-## 🧠 Notebooks & Offline Exploration
+## Notebooks & Offline Exploration
 
 The `cenfri.ipynb` notebook documents exploratory data analysis, feature engineering trials, and supporting visuals that informed the dashboard narrative. Run it with Jupyter or VS Code notebooks after installing requirements.
 
-## 📦 Deployment
+## Deployment
 
 - The project is deployable on **Streamlit Cloud**. Ensure `requirements.txt` stays synchronized with the app.
 - Include `logo.webp` and `stolen_vehicles_enhanced.csv` in the root directory of the deployment.
 - For containerized development, open the repo in VS Code and select “Reopen in Container”.
 
-## 📑 Assessment Deliverables
+##  Assessment Deliverables
 
 | Deliverable | Location | Description |
 |-------------|----------|-------------|
@@ -99,18 +98,6 @@ The `cenfri.ipynb` notebook documents exploratory data analysis, feature enginee
 | Notebook | `cenfri.ipynb` | Exploratory analysis and supplementary charts. |
 | README | `README.md` | Project documentation, setup steps, and narrative. |
 
-## 🤝 Contributing & Feedback
 
-Pull requests and issues are welcome. If you have ideas for new analyses, external datasets to integrate, or UX tweaks, feel free to open an issue or connect with @chrismazi.
 
-## 📬 Contact
 
-- **Author:** Prince Chris Mazimpaka
-- **Email:** [megan@cenfri.org](mailto:megan@cenfri.org) *(Assessment submission address)*
-- **LinkedIn:** [linkedin.com/in/princechrism](https://www.linkedin.com/in/princechrism) *(replace with your profile if different)*
-
----
-
-<p align="center">
-  Built with ❤️ using Python, Streamlit, and Plotly for data-driven policing insights.
-</p>
